@@ -9,9 +9,35 @@ namespace WebViewLib
 {
     public class WebViewHost : WindowsFormsHost
     {
+        public static readonly DependencyProperty SourceProperty =
+              DependencyProperty.Register(
+               "Source",
+               typeof(string),
+               typeof(WebViewHost),
+               new PropertyMetadata(null, OnSourceChanged));
+
+        public string Source
+        {
+            get => (string)GetValue(SourceProperty);
+            set => SetValue(SourceProperty, value);
+        }
+
+        private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is WebViewHost host && e.NewValue is string url)
+                host.Navigate(url);
+        }
+
         public WebView2 WebView { get; private set; }
         CoreWebView2Environment _environment;
         bool _isIPhoneMode = true;
+
+        public WebViewHost()
+        {
+            WebView = new WebView2 { AllowExternalDrop = false };
+            this.Child = WebView;
+            SetCore();
+        }
 
         public WebViewHost(bool isIPhoneMode = true)
         {
