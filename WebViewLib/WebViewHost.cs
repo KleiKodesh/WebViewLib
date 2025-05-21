@@ -1,13 +1,13 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System;
-using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms.Integration;
 
 namespace WebViewLib
 {
-    public class WebViewHost : WindowsFormsHost
+    public class WebViewHost : ContentControl
     {
         public static readonly DependencyProperty SourceProperty =
               DependencyProperty.Register(
@@ -35,7 +35,8 @@ namespace WebViewLib
         public WebViewHost()
         {
             WebView = new WebView2 { AllowExternalDrop = false };
-            this.Child = WebView;
+            var host = new WindowsFormsHost { Child = WebView };
+            this.Content = host;
             SetCore();
         }
 
@@ -43,7 +44,8 @@ namespace WebViewLib
         {
             _isIPhoneMode = isIPhoneMode;
             WebView = new WebView2 { AllowExternalDrop = false };
-            this.Child = WebView;           
+            var host = new WindowsFormsHost { Child = WebView };
+            this.Content = host;
             SetCore(isIPhoneMode);
         }
 
