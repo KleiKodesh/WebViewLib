@@ -50,6 +50,15 @@ namespace WebViewLib
             SetCore();
         }
 
+        public WebViewHost(string uri)
+        {
+            WebView = new WebView2 { AllowExternalDrop = false };
+            var host = new WindowsFormsHost { Child = WebView };
+            this.Content = host;
+            SetCore();
+            Navigate(uri);
+        }
+
         public WebViewHost(bool isIPhoneMode = true)
         {
             _isIPhoneMode = isIPhoneMode;
