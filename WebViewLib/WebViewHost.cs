@@ -1,14 +1,24 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.Integration;
 
 namespace WebViewLib
 {
-    public class WebViewHost : ContentControl
+    public class WebViewHost : ContentControl, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         public static readonly DependencyProperty SourceProperty =
               DependencyProperty.Register(
                "Source",
@@ -29,7 +39,7 @@ namespace WebViewLib
         }
 
         public WebView2 WebView { get; private set; }
-        CoreWebView2Environment _environment;
+        protected CoreWebView2Environment _environment;
         bool _isIPhoneMode = true;
 
         public WebViewHost()
@@ -49,11 +59,20 @@ namespace WebViewLib
             SetCore(isIPhoneMode);
         }
 
+
+        async void SetCore(bool iPhoneMode = true)
+        {
+            string tempWebCacheDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            _environment = await CoreWebView2Environment.CreateAsync(userDataFolder: tempWebCacheDir);
+        }
+
+        public async Task EnsurCoreAsync() => await WebView.EnsureCoreWebView2Async(_environment);
+        
         public async void Navigate(string url)
         {
             try
             {
-                await WebView.EnsureCoreWebView2Async(_environment);
+                await EnsurCoreAsync();
                 if (_isIPhoneMode)
                 {
                     if (url.Contains("dicta.org") == true)
@@ -66,10 +85,18 @@ namespace WebViewLib
             catch (Exception ex){ MessageBox.Show(ex.Message); }
         }
 
-        async void SetCore(bool iPhoneMode = true)
+        public void DocumentWrite(string html)
         {
-            string tempWebCacheDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            _environment = await CoreWebView2Environment.CreateAsync(userDataFolder: tempWebCacheDir);           
+            string tempFilePath = Path.Combine(Path.GetTempPath(), $"Otzarnik_Temp_File{Guid.NewGuid()}.html");
+            File.WriteAllText(tempFilePath, html);
+            WebView.NavigationCompleted +=  (s, e) => File.Delete(tempFilePath);
+            Navigate(tempFilePath);
+        }
+
+        public async Task ExcuteScriptAsync(string script)
+        {
+            await EnsurCoreAsync();
+            await WebView.ExecuteScriptAsync(script);
         }
     }
 }
