@@ -102,10 +102,10 @@ namespace WebViewLib
             Navigate(tempFilePath);
         }
 
-        public async Task ExcuteScriptAsync(string script)
+        public async Task<string> ExecuteScriptAsync(string script)
         {
             await EnsurCoreAsync();
-            await WebView.ExecuteScriptAsync(script);
+            return await WebView.ExecuteScriptAsync(script) ;
         }
     }
 }
