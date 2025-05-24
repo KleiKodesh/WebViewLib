@@ -1,11 +1,8 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +10,7 @@ using System.Windows.Forms.Integration;
 
 namespace WebViewLib
 {
-    public class WebViewHost : ContentControl, INotifyPropertyChanged
+    public class WebViewHost : ContentControl, INotifyPropertyChanged, IDisposable
     {
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName) =>
@@ -106,6 +103,14 @@ namespace WebViewLib
         {
             await EnsurCoreAsync();
             return await WebView.ExecuteScriptAsync(script) ;
+        }
+
+        public async Task Sleep() =>
+             await WebView?.CoreWebView2.TrySuspendAsync();
+
+        public void Dispose()
+        {
+            WebView.Dispose();
         }
     }
 }
