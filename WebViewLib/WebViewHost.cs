@@ -72,7 +72,19 @@ namespace WebViewLib
             _environment = await CoreWebView2Environment.CreateAsync(userDataFolder: tempWebCacheDir);
         }
 
-        public async Task EnsurCoreAsync() => await WebView.EnsureCoreWebView2Async(_environment);
+        private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
+        {
+            WebView.CoreWebView2.Navigate(e.Uri);
+            e.Handled = true;
+        }
+
+        public async Task EnsurCoreAsync()
+        {
+            await WebView.EnsureCoreWebView2Async(_environment);
+            WebView.CoreWebView2.NewWindowRequested -= CoreWebView2_NewWindowRequested;
+            WebView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
+        }
+
         
         public async void Navigate(string url)
         {
