@@ -112,7 +112,9 @@ namespace WebViewLib
                     if (url.Contains("dicta.org") == true)
                         WebView.CoreWebView2.Settings.UserAgent = null;
                     else
-                        WebView.CoreWebView2.Settings.UserAgent = "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.100 Mobile Safari/537.36";
+                        WebView.CoreWebView2.Settings.UserAgent =
+                    //"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
+                    "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.100 Mobile Safari/537.36";
                 }
                 WebView.CoreWebView2.Navigate(url);
             }
