@@ -59,17 +59,30 @@ namespace WebViewLib
         public WebViewHost(bool isIPhoneMode = true)
         {
             _isIPhoneMode = isIPhoneMode;
+
             WebView = new WebView2 { AllowExternalDrop = false };
+            WebView.NavigationStarting += WebView_NavigationStarting;
+            WebView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
+
             var host = new WindowsFormsHost { Child = WebView };
             this.Content = host;
             SetCore(isIPhoneMode);
         }
 
-
-        async void SetCore(bool iPhoneMode = true)
+        private void WebView_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
-            string tempWebCacheDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            _environment = await CoreWebView2Environment.CreateAsync(userDataFolder: tempWebCacheDir);
+            WebView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
+        }
+
+        private void WebView_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            Uri uri = new Uri(e.Uri);
+            if (uri.Scheme == Uri.UriSchemeFile)
+            {
+                string filePath = uri.LocalPath;
+                if (!File.Exists(filePath))
+                    e.Cancel = true;
+            }
         }
 
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
@@ -78,13 +91,16 @@ namespace WebViewLib
             e.Handled = true;
         }
 
+        async void SetCore(bool iPhoneMode = true)
+        {
+            string tempWebCacheDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            _environment = await CoreWebView2Environment.CreateAsync(userDataFolder: tempWebCacheDir);
+        }
+
         public async Task EnsurCoreAsync()
         {
             await WebView.EnsureCoreWebView2Async(_environment);
-            WebView.CoreWebView2.NewWindowRequested -= CoreWebView2_NewWindowRequested;
-            WebView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
         }
-
         
         public async void Navigate(string url)
         {
