@@ -121,11 +121,12 @@ namespace WebViewLib
             catch (Exception ex){ MessageBox.Show(ex.Message); }
         }
 
-        public void DocumentWrite(string html)
+        public async void DocumentWrite(string html)
         {
+            await EnsurCoreAsync();
             string tempFilePath = Path.Combine(Path.GetTempPath(), $"Otzarnik_Temp_File{Guid.NewGuid()}.html");
             File.WriteAllText(tempFilePath, html);
-            WebView.NavigationCompleted +=  (s, e) => File.Delete(tempFilePath);
+            WebView.CoreWebView2.DOMContentLoaded +=  (s, _) => File.Delete(tempFilePath);
             Navigate(tempFilePath);
         }
 
