@@ -42,6 +42,9 @@ namespace WebViewLib
         public WebViewHost()
         {
             WebView = new WebView2 { AllowExternalDrop = false };
+            WebView.NavigationStarting += WebView_NavigationStarting;
+            WebView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
+
             var host = new WindowsFormsHost { Child = WebView };
             this.Content = host;
             SetCore();
@@ -50,6 +53,9 @@ namespace WebViewLib
         public WebViewHost(string uri)
         {
             WebView = new WebView2 { AllowExternalDrop = false };
+            WebView.NavigationStarting += WebView_NavigationStarting;
+            WebView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
+
             var host = new WindowsFormsHost { Child = WebView };
             this.Content = host;
             SetCore();
@@ -83,6 +89,16 @@ namespace WebViewLib
                 if (!File.Exists(filePath))
                     e.Cancel = true;
             }
+
+            if (_isIPhoneMode)
+            {
+                if (e.Uri.Contains("dicta.org") == true)
+                    WebView.CoreWebView2.Settings.UserAgent = null;
+                else
+                    WebView.CoreWebView2.Settings.UserAgent =
+                //"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
+                "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.100 Mobile Safari/537.36";
+            }
         }
 
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
@@ -107,18 +123,9 @@ namespace WebViewLib
             try
             {
                 await EnsurCoreAsync();
-                if (_isIPhoneMode)
-                {
-                    if (url.Contains("dicta.org") == true)
-                        WebView.CoreWebView2.Settings.UserAgent = null;
-                    else
-                        WebView.CoreWebView2.Settings.UserAgent =
-                    //"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
-                    "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.100 Mobile Safari/537.36";
-                }
                 WebView.CoreWebView2.Navigate(url);
             }
-            catch (Exception ex){ MessageBox.Show(ex.Message); }
+            catch (Exception ex){ MessageBox.Show(ex.Message, "WebViewHostError"); }
         }
 
         public async void DocumentWrite(string html)
