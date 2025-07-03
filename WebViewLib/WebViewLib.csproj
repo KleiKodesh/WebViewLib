@@ -90,6 +90,11 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ThemeManager.cs" />
+    <Compile Include="ViewModelBase.cs" />
+    <Compile Include="WebViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="WebViewHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
