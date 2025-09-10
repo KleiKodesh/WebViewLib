@@ -31,12 +31,12 @@ namespace KleiKodesh.RibbonSettings
         {
             if (propertyName == "Foreground")
             {
-                string color = ThemeManager.ToRgbString(ThemeManager.Theme.Foreground);
+                string color = ThemeManager.ColorToRgbString(ThemeManager.Theme.Foreground);
                 await ExecuteScriptAsync($@"document.body.style.color = ""{color}"";");
             }
             else if (propertyName == "Background")
             {
-                string color = ThemeManager.ToRgbString(ThemeManager.Theme.Background);
+                string color = ThemeManager.ColorToRgbString(ThemeManager.Theme.Background);
                 await ExecuteScriptAsync($@"document.body.style.background = ""{color}"";");
             }
         }
@@ -76,20 +76,23 @@ namespace KleiKodesh.RibbonSettings
                 string tempWebCacheDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 _environment = await CoreWebView2Environment.CreateAsync(userDataFolder: tempWebCacheDir);
             }
+
             await WebView.EnsureCoreWebView2Async(_environment);
-            WebView.CoreWebView2.DOMContentLoaded += (_, __) =>
-            {
-                SetColor("Foreground");
-                SetColor("Background");
-            };
         }
 
         public async Task Navigate(string url)
         {
             progressBar.Style = ProgressBarStyle.Marquee;
             progressBar.Visible = true;
-            await EnsurCoreAsync();
-            WebView.CoreWebView2.Navigate(url); 
+            //await EnsurCoreAsync();
+            //WebView.CoreWebView2.DOMContentLoaded += (_, __) =>
+            //{
+            //    SetColor("Foreground");
+            //    SetColor("Background");
+            //};
+
+            WebView.Source = new Uri("file:///" + url.Replace("\\", "/"));
+            //WebView.CoreWebView2.Navigate(url); 
         }
 
         private void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
