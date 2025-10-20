@@ -115,7 +115,8 @@ namespace WebViewLib
 
         public async Task EnsurCoreAsync()
         {
-            await WebView.EnsureCoreWebView2Async(_environment);
+            if (WebView.CoreWebView2 == null)
+                await WebView.EnsureCoreWebView2Async(_environment);
         }
         
         public async void Navigate(string url)
